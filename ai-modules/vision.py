@@ -16,7 +16,7 @@ except Exception as e:
     exit()
 
 print("Loading YOLOv8 model...")
-model = YOLO("yolov8n.pt")
+model = YOLO("yolo26n.pt")
 
 
 # ! warning get the values from gps

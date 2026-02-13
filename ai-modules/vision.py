@@ -1,15 +1,13 @@
 import cv2
-from ultralytics import YOLO
+from ultralytics import YOLO  # type: ignore
 import socketio
-import math
 
-# 1. Configuration
-# ----------------
+# INFO - Change server url in R-Pi
 SERVER_URL = "http://localhost:8000"
 MY_LAT = 34.0161
 MY_LON = 75.3150
-KNOWN_HEIGHT = 1.7  # Average human height (meters)
-FOCAL_LENGTH = 600  # Calibration factor (Adjust this later)
+KNOWN_HEIGHT = 1.7
+FOCAL_LENGTH = 600
 
 sio = socketio.Client()
 try:
@@ -22,22 +20,21 @@ except Exception as e:
 print("Loading YOLOv8 model...")
 model = YOLO("yolov8n.pt")
 
-cap = cv2.VideoCapture(0)  # 0 is usually the default webcam
+# INFO - change for capturing video
+cap = cv2.VideoCapture(0)
 
 while cap.isOpened():
     success, frame = cap.read()
     if not success:
         break
 
-    # Run AI Inference
     results = model(frame, verbose=False)
 
     enemy_detected = False
 
     for r in results:
         for box in r.boxes:
-            # Class '0' is Person. We assume all people are threats for this demo.
-            if int(box.cls[0]) == 0:
+            if int(box.cls[0]) == 0:  # class 0 is person
                 enemy_detected = True
 
                 # Get Bounding Box Dimensions
@@ -87,7 +84,7 @@ while cap.isOpened():
                     2,
                 )
 
-    # Show the "Soldier's View"
+    # INFO - transmit the data no need to show in raspberry pi
     cv2.imshow("SENTINEL :: WEAPON SIGHT", frame)
 
     if cv2.waitKey(1) & 0xFF == ord("q"):

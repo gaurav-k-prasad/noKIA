@@ -1,36 +1,43 @@
-// frontend/components/Map.tsx
 "use client";
 
-import { LatLngTuple } from "leaflet";
+import L from "leaflet";
 import 'leaflet/dist/leaflet.css';
-import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
+import { CircleMarker, ImageOverlay, MapContainer, Popup } from 'react-leaflet';
 
 export default function Map({ units }: { units: any }) {
-  // Center of map - Siachin Glacier
-  const defaultCenter: LatLngTuple = [34.0161, 75.3150];
+  const imageUrl = '/satellite-image-map.png';
+
+  const imageWidth = 800; 
+  const imageHeight = 800;
+
+  // 3. Set the bounds: [[bottom, left], [top, right]]
+  // In CRS.Simple, it's generally [y, x]. 
+  const bounds: L.LatLngBoundsExpression = [
+    [0, 0],
+    [imageHeight, imageWidth]
+  ];
 
   return (
     <MapContainer
-      center={defaultCenter}
-      zoom={15}
-      style={{ height: "100%", width: "100%", zIndex: 0 }}
-      className="z-0"
-    >
-      <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  crs={L.CRS.Simple}
+  bounds={bounds}
+  maxBounds={bounds} // 👈 This traps the user inside the image!
+  maxBoundsViscosity={1.0} // 👈 Makes the edge feel like a solid wall (no bouncing)
+  style={{ height: "100%", width: "100%", backgroundColor: "#000000" }}
+>
+      <ImageOverlay
+        url={imageUrl}
+        bounds={bounds}
       />
 
-
-      {/* Render Units */}
       {Object.values(units).map((unit: any) => {
-        // Color Logic: Enemy = Red, Friendly = Cyan
         const color = unit.type === 'enemy' ? '#ff0000' : '#00ffff';
 
         return (
           <CircleMarker
             key={unit.id}
-            center={[unit.lat, unit.lon]}
+            // 4. Coordinates are now [y, x] relative to your image pixels!
+            center={[unit.lat, unit.lon]} 
             pathOptions={{ color: color, fillColor: color, fillOpacity: 0.7, radius: 5 }}
           >
             <Popup>

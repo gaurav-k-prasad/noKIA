@@ -9,14 +9,13 @@ import {
   WifiOff,
 } from "lucide-react";
 
-// Define the structure of a threat alert
 export interface ThreatAlert {
   id: string;
   type: "ddos" | "intrusion" | "biometric" | "jamming" | "visual";
   severity: "critical" | "warning" | "info";
   message: string;
   timestamp: string;
-  source: string; // e.g., "Server 1", "Alpha-1", "YOLO-Cam-3"
+  source: string;
 }
 
 export default function ThreatAlertsModule({
@@ -24,7 +23,6 @@ export default function ThreatAlertsModule({
 }: {
   alerts: ThreatAlert[];
 }) {
-  // Helper to get the right icon based on threat type
   const getAlertIcon = (type: ThreatAlert["type"]) => {
     switch (type) {
       case "ddos":
@@ -42,7 +40,6 @@ export default function ThreatAlertsModule({
     }
   };
 
-  // Helper to get styling based on severity
   const getSeverityStyles = (severity: ThreatAlert["severity"]) => {
     switch (severity) {
       case "critical":
@@ -69,7 +66,6 @@ export default function ThreatAlertsModule({
 
   return (
     <div className="flex flex-col h-full w-full bg-slate-900 border-2 border-slate-700 rounded-lg overflow-hidden font-mono text-sm shadow-lg">
-      {/* Header */}
       <div className="bg-slate-800 text-slate-300 p-3 border-b border-slate-700 font-bold uppercase tracking-wider flex justify-between items-center">
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-red-500" />
@@ -101,7 +97,7 @@ export default function ThreatAlertsModule({
                 key={alert.id}
                 className={`flex items-start gap-3 p-3 rounded border ${styles.bg}`}
               >
-                {/* Flashing Indicator Dot for Criticals */}
+                {/* Flashing Indicator Dot for Critical */}
                 <div className="pt-1.5">
                   <div
                     className={`w-2 h-2 rounded-full ${styles.indicator}`}

@@ -2,10 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
-// Simplified to strictly internal communications
 export interface CommMessage {
   id: string;
-  sender: string; // e.g., "Center", "Alpha-1", "Bravo-2"
+  sender: string;
   text: string;
   timestamp: string;
   type: "center" | "soldier" | "system";
@@ -14,20 +13,18 @@ export interface CommMessage {
 export default function TeamComms({ messages }: { messages: CommMessage[] }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to the latest transmission
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Color logic for internal network
   const getMessageStyle = (type: CommMessage["type"]) => {
     switch (type) {
       case "center":
-        return "text-yellow-400 font-bold"; // Command center stands out
+        return "text-yellow-400 font-bold";
       case "soldier":
-        return "text-cyan-400"; // Matches your friendly map markers
+        return "text-cyan-400";
       case "system":
-        return "text-slate-500 italic"; // Network alerts
+        return "text-slate-500 italic";
       default:
         return "text-white";
     }
@@ -35,17 +32,14 @@ export default function TeamComms({ messages }: { messages: CommMessage[] }) {
 
   return (
     <div className="flex flex-col h-full w-full bg-slate-900 border-2 border-slate-700 rounded-lg overflow-hidden font-mono text-sm shadow-lg">
-      {/* Header */}
       <div className="bg-slate-800 text-slate-300 p-3 border-b border-slate-700 font-bold uppercase tracking-wider flex justify-between items-center">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-          <span>SECURE NET: TEAM ALPHA</span>
+          <span>SECURE NETWORK</span>
         </div>
         <span className="text-xs text-slate-500">FREQ: 144.05 MHz</span>
       </div>
 
-      {/* Transcription Area */}
-      {/* Transcription Area */}
       <div
         className="flex-1 overflow-y-auto p-4 space-y-4 
           /* Firefox */
@@ -80,7 +74,6 @@ export default function TeamComms({ messages }: { messages: CommMessage[] }) {
             </div>
           ))
         )}
-        {/* Invisible div used to anchor the auto-scroll */}
         <div ref={messagesEndRef} />
       </div>
     </div>

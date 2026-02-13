@@ -7,8 +7,8 @@ import { CircleMarker, ImageOverlay, MapContainer, Popup } from "react-leaflet";
 export default function Map({ units }: { units: any }) {
   const imageUrl = "/satellite-image-map.png";
 
-  const imageWidth = 1500;
-  const imageHeight = 1500;
+  const imageWidth = 512;
+  const imageHeight = 512;
 
   const bounds: L.LatLngBoundsExpression = [
     [0, 0],
@@ -25,30 +25,49 @@ export default function Map({ units }: { units: any }) {
         style={{ height: "100%", width: "100%", backgroundColor: "#000000" }}
       >
         <ImageOverlay url={imageUrl} bounds={bounds} />
-
-        {Object.values(units).map((unit: any) => {
-          const color = unit.type === "enemy" ? "#ff0000" : "#00ffff";
-
+        {/* {JSON.stringify(units)} */}
+        {Object.values(units).map((unit: any, i) => {
+          const d = unit.data;
+          const alpha = unit.status == "active" ? "f" : "8";
           return (
-            <CircleMarker
-              key={unit.id}
-              // 4. Coordinates are now [y, x] relative to your image pixels!
-              center={[unit.lat, unit.lon]}
-              pathOptions={{
-                color: color,
-                fillColor: color,
-                fillOpacity: 0.7,
-                radius: 5,
-              }}
-            >
-              <Popup>
-                <div className="text-black font-bold">
-                  ID: {unit.id} <br />
-                  HR: {unit.heart_rate} <br />
-                  STATUS: {unit.status}
-                </div>
-              </Popup>
-            </CircleMarker>
+            <>
+              <CircleMarker
+                key={i}
+                center={[d.pos[0], d.pos[1]]}
+                pathOptions={{
+                  color: "#0ff" + alpha,
+                  fillColor: "#0ff" + alpha,
+                  fillOpacity: 0.7,
+                  radius: 5,
+                }}
+              >
+                <Popup>
+                  <div className="text-black font-bold">
+                    ID: {d.id} <br />
+                  </div>
+                </Popup>
+              </CircleMarker>
+              {d.calculated_threats.map((enemy, k) => {
+                return (
+                  <CircleMarker
+                    key={k}
+                    center={[enemy.pos_x, enemy.pos_y]}
+                    pathOptions={{
+                      color: "#f00" + alpha,
+                      fillColor: "#f00" + alpha,
+                      fillOpacity: 0.7,
+                      radius: 5,
+                    }}
+                  >
+                    <Popup>
+                      <div className="text-black font-bold">
+                        By Soldier: {d.id} <br />
+                      </div>
+                    </Popup>
+                  </CircleMarker>
+                );
+              })}
+            </>
           );
         })}
       </MapContainer>

@@ -36,7 +36,7 @@ async def run_simulation():
             await sio.emit("new_message", new_msg)
             print(f"Sent Message: {new_msg['id']}")
 
-        await asyncio.sleep(0.2)
+        await asyncio.sleep(2.5)
 
 
 @app.on_event("startup")

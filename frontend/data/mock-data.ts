@@ -1,4 +1,5 @@
 import { CommMessage } from "@/components/Comms";
+import { HeartCheck } from "@/components/HeartCheck";
 import { ThreatAlert } from "@/components/ThreatAlert";
 
 export const mockAlerts: ThreatAlert[] = [
@@ -82,3 +83,20 @@ export const mockNetworkLog: CommMessage[] = [
     type: "center",
   },
 ];
+
+// Mock data: Keys are names, values are arrays of historical BPM data
+export const mockHeartData: HeartCheck = {
+  "Rahul Kumar": [
+    72, 74, 75, 76, 75, 78, 80, 81, 79, 82, 85, 84, 86, 88, 87, 89, 92, 95, 96,
+    98,
+  ], // Normal/Elevated
+  "Gaurav Prasad": [
+    110, 115, 120, 125, 130, 135, 140, 142, 145, 148, 150, 155, 160, 158, 162,
+    165, 168, 170, 172, 175,
+  ], // Critical Spike
+  "Ananya Jain": [
+    65, 66, 65, 64, 66, 67, 68, 65, 64, 65, 66, 67, 65, 64, 66, 65, 64, 63, 65,
+    66,
+  ], // Stable resting
+  "Vasquez Hatim": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Offline / Sensor loss
+};

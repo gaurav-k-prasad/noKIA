@@ -6,13 +6,16 @@ import TeamComms, { CommMessage } from "@/components/Comms";
 import EnvironmentModule from "@/components/Environment";
 import Map from "@/components/MapDynamic";
 import ThreatAlertsModule, { ThreatAlert } from "@/components/ThreatAlert";
-// import { mockAlerts, mockNetworkLog } from "@/mock-data/data";
+// import { mockAlerts, mockNetworkLog } from "@/data/mock-data";
+import HeartCheckModule, { HeartCheck } from "@/components/HeartCheck";
+import { mockHeartData } from "@/data/mock-data";
 
 export default function Home() {
   const [units, setUnits] = useState({});
 
   const [networkLog, setNetworkLog] = useState<CommMessage[]>([]);
   const [alertLog, setAlertLog] = useState<ThreatAlert[]>([]);
+  const [heartRateLog, setHeartRateLog] = useState<HeartCheck[]>([]);
 
   useEffect(() => {
     // Connect to Backend
@@ -51,6 +54,10 @@ export default function Home() {
 
       <div className="row-start-1 row-end-4 col-start-4 col-end-5">
         <ThreatAlertsModule alerts={alertLog} />
+      </div>
+
+      <div className="row-start-3 row-end-4 col-start-2 col-end-4">
+        <HeartCheckModule data={mockHeartData} />
       </div>
     </main>
   );

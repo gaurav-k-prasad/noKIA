@@ -24,7 +24,7 @@ export default function EnvironmentModule() {
     .toUpperCase();
 
   return (
-    <div className="flex flex-col bg-slate-900 border-2 border-slate-700 rounded-lg overflow-hidden font-mono text-sm shadow-lg w-100 h-full max-w-sm">
+    <div className="flex flex-col bg-slate-900 border-2 border-slate-700 rounded-lg overflow-hidden font-mono text-sm shadow-lg w-full h-full">
       <div className="bg-slate-800 text-slate-300 p-3 border-b border-slate-700 font-bold uppercase tracking-wider flex justify-between items-center">
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-cyan-400" />

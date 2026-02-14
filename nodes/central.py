@@ -11,13 +11,17 @@ ser = serial.Serial(SERIAL_PORT, BAUD, timeout=0.1)
 
 SOLDIER_ID = "soldier_01"
 
-def update_json(message="", lat=0.0, lon=0.0):
+def update_json(message, lat, lon, degrees, direction):
     data = {
         "id": SOLDIER_ID,
         "message": message,
         "location": {
             "latitude": lat,
             "longitude": lon
+        },
+        "heading": {
+            "degrees": degrees,
+            "direction": direction
         },
         "timestamp": int(time.time())
     }
@@ -37,24 +41,34 @@ def receive():
 
         print("<<", line)
 
-        if "RX:[DATA]" in line:
+        if "[DATA]" in line:
             try:
-                payload = line.split("RX:[DATA]")[-1].strip()
-                message_part, gps_part = payload.split("|")
+                # Remove [DATA]
+                payload = line.split("[DATA]")[-1].strip()
 
+                # Split full packet
+                message_part, gps_part, heading_part = payload.split("|")
+
+                # Message
                 message = message_part.strip()
-                lat_str, lon_str = gps_part.strip().split(",")
 
+                # GPS
+                lat_str, lon_str = gps_part.strip().split(",")
                 lat = float(lat_str)
                 lon = float(lon_str)
 
-                update_json(message, lat, lon)
+                # Heading
+                degree_str, direction = heading_part.strip().split(",")
+                degrees = float(degree_str)
+                direction = direction.strip()
+
+                update_json(message, lat, lon, degrees, direction)
 
             except Exception as e:
                 print("Parse Error:", e)
 
 
-# Start receive thread
+# Start receiver thread
 threading.Thread(target=receive, daemon=True).start()
 
 print("Listening for LoRa data...")

@@ -50,12 +50,13 @@ void setup()
 
 void loop()
 {
-
+  // 1. Process GPS Data
   while (gpsSerial.available())
   {
     gps.encode(gpsSerial.read());
   }
 
+  // 2. Process Compass Data
   compass.read();
 
   float x = (compass.getX() - offsetX) * scaleX;
@@ -70,9 +71,14 @@ void loop()
   if (heading > 360)
     heading -= 360;
 
-  // -------- SERIAL → LORA --------
-  if (Serial.available())
+  // 3. AUTOMATIC TRANSMISSION (Replaces Serial.available trigger)
+  static unsigned long lastTxTime = 0;
+  const unsigned long TX_INTERVAL = 2000; // Broadcast every 2000ms (2 seconds)
+
+  if (millis() - lastTxTime >= TX_INTERVAL)
   {
+    lastTxTime = millis(); // Reset the timer
+
     String packet = "[S]";
 
     if (gps.location.isValid())
@@ -83,19 +89,22 @@ void loop()
     }
     else
     {
-      packet += "0,0";
+      packet += "0,0"; // Failsafe if no satellite lock
     }
 
     packet += "|";
     packet += String((int)heading);
 
+    // Broadcast over LoRa to other nodes
     LoRa.beginPacket();
     LoRa.print(packet);
     LoRa.endPacket();
 
+    // Print to USB Serial for your Python backend to read!
     Serial.println(packet);
   }
 
+  // 4. LORA RECEIVE LOGIC
   int packetSize = LoRa.parsePacket();
 
   if (packetSize)
@@ -106,6 +115,8 @@ void loop()
       received += (char)LoRa.read();
     }
     received.trim();
+
+    // Print incoming LoRa messages to Python as well
     Serial.println(received);
   }
 }

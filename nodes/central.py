@@ -3,6 +3,8 @@ import threading
 import json
 import time
 
+from decrypt_speech import decrypt_and_speak
+
 SERIAL_PORT = "COM5"
 BAUD = 115200
 OUTPUT_FILE = "data.json"
@@ -11,19 +13,15 @@ ser = serial.Serial(SERIAL_PORT, BAUD, timeout=0.1)
 
 SOLDIER_ID = "soldier_01"
 
-def update_json(message, lat, lon, degrees, direction):
+
+def update_json(lat, lon, degrees, dists, health):
     data = {
         "id": SOLDIER_ID,
-        "message": message,
-        "location": {
-            "latitude": lat,
-            "longitude": lon
-        },
-        "heading": {
-            "degrees": degrees,
-            "direction": direction
-        },
-        "timestamp": int(time.time())
+        "location": {"latitude": lat, "longitude": lon},
+        "heading": degrees,
+        "dists": dists,
+        "health": health,
+        "timestamp": int(time.time()),
     }
 
     with open(OUTPUT_FILE, "w") as f:
@@ -34,38 +32,50 @@ def update_json(message, lat, lon, degrees, direction):
 
 def receive():
     while True:
-        line = ser.readline().decode(errors='ignore').strip()
+        try:
+            line = ser.readline().decode(errors="ignore").strip()
 
-        if not line:
-            continue
+            if not line:
+                continue
+            print("<<", line)
 
-        print("<<", line)
+            if line.startswith("[D]"):
+                payload = line[3:].strip()
 
-        if "[DATA]" in line:
-            try:
-                # Remove [DATA]
-                payload = line.split("[DATA]")[-1].strip()
+                try:
+                    data, iv = payload.split(",", 1)
+                    message = decrypt_and_speak(data, iv)
+                    print(">> Decrypted Message:", message)
+                except Exception as e:
+                    print("Decrypt Error:", e)
 
-                # Split full packet
-                message_part, gps_part, heading_part = payload.split("|")
+            elif line.startswith("[S]"):
+                payload = line[3:].strip()
 
-                # Message
-                message = message_part.strip()
+                try:
+                    gps_part, heading_part, dist, health = payload.split("|")
 
-                # GPS
-                lat_str, lon_str = gps_part.strip().split(",")
-                lat = float(lat_str)
-                lon = float(lon_str)
+                    # GPS
+                    lat_str, lon_str = gps_part.split(",")
+                    lat = float(lat_str)
+                    lon = float(lon_str)
 
-                # Heading
-                degree_str, direction = heading_part.strip().split(",")
-                degrees = float(degree_str)
-                direction = direction.strip()
+                    # Heading (assuming single value like "123")
+                    heading = float(heading_part)
 
-                update_json(message, lat, lon, degrees, direction)
+                    # Distances
+                    dists = list(map(float, dist.split(",")))
 
-            except Exception as e:
-                print("Parse Error:", e)
+                    # Health
+                    health = float(health)
+
+                    update_json(lat, lon, heading, dists, health)
+
+                except Exception as e:
+                    print("Self Data Parse Error:", e)
+
+        except Exception as e:
+            print("Serial Error:", e)
 
 
 # Start receiver thread

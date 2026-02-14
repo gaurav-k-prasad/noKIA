@@ -64,6 +64,7 @@ class Simulator:
         }
 
         self.call_signs = ["Viper-1", "Viper-2", "Ghost-Actual", "Saber-6", "Raven-04"]
+        self.sol_ids = list(range(5))
 
         self.dialogue_pools = {
             "system": [
@@ -88,6 +89,12 @@ class Simulator:
                 "Objective secure. Waiting for further orders.",
             ],
         }
+
+    def next_heart_data(self):
+        drift = random.randint(60, 120)
+
+        sol = random.choice(self.sol_ids)
+        return {"id": sol, "name": self.call_signs[sol], "value": drift}
 
     def next_threat(self):
         self.threat_id += 1
@@ -147,8 +154,3 @@ class Simulator:
             "timestamp": datetime.now().strftime("%H:%M:%S"),
             "type": t_type,
         }
-
-
-sim = Simulator()
-for _ in range(3):
-    print(sim.next_message())

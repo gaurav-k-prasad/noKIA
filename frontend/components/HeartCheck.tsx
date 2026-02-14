@@ -3,8 +3,13 @@
 import { Activity, AlertCircle, HeartPulse, User } from "lucide-react";
 import { useState } from "react";
 
-// The data structure you described: Keys are names, values are arrays of BPMs
-export type HeartCheck = Record<string, number[]>;
+export interface HeartDetails {
+  id: string;
+  name: string;
+  values: number[];
+}
+
+export type HeartCheck = Record<string, HeartDetails>;
 
 export default function HeartCheckModule({ data }: { data: HeartCheck }) {
   const soldiers = Object.keys(data);
@@ -21,7 +26,9 @@ export default function HeartCheckModule({ data }: { data: HeartCheck }) {
 
   const selectedData = data[selectedSoldier] || [];
   const currentHR =
-    selectedData.length > 0 ? selectedData[selectedData.length - 1] : 0;
+    selectedData.values.length > 0
+      ? selectedData.values[selectedData.values.length - 1]
+      : 0;
 
   // Logic to determine status and colors based on heart rate
   const getStatus = (hr: number) => {
@@ -66,10 +73,10 @@ export default function HeartCheckModule({ data }: { data: HeartCheck }) {
   // --- SVG SPARKLINE GENERATOR ---
   // Maps the array of heartbeats to an SVG line path
   const generateChartPath = () => {
-    if (selectedData.length === 0) return "";
+    if (selectedData.values.length === 0) return "";
 
     // We only want to show the last 20 data points so it doesn't get squished
-    const recentData = selectedData.slice(-20);
+    const recentData = selectedData.values.slice(-20);
     const maxDataPoints = 20;
 
     // Fixed Y-axis scale (40 BPM to 180 BPM)
@@ -101,7 +108,9 @@ export default function HeartCheckModule({ data }: { data: HeartCheck }) {
         <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-700">
           {soldiers.map((soldier) => {
             const isSelected = selectedSoldier === soldier;
-            const latestHr = data[soldier][data[soldier].length - 1] || 0;
+
+            const latestHr =
+              data[soldier].values[data[soldier].values.length - 1] || 0;
             const soldierStatus = getStatus(latestHr);
 
             return (
@@ -121,7 +130,7 @@ export default function HeartCheckModule({ data }: { data: HeartCheck }) {
                   <span
                     className={`font-bold uppercase ${isSelected ? "text-white" : "text-slate-400"}`}
                   >
-                    {soldier}
+                    {data[soldier].name}
                   </span>
                 </div>
                 {/* Small indicator dot on the list */}

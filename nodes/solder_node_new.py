@@ -10,7 +10,9 @@ from decrypt_speech import decrypt_and_speak
 SERIAL_PORT = "COM3"
 BAUD = 115200
 OUTPUT_FILE = "data.json"
-lat = 0, lon = 0, heading = 0
+lat = 0
+lon = 0
+heading = 0
 
 ser = serial.Serial(SERIAL_PORT, BAUD, timeout=0.1)
 
@@ -34,12 +36,50 @@ def receive():
         try:
             line = ser.readline().decode(errors="ignore").strip()
             if not line:
-                print("no output")
+                print("no output", lat, lon, heading)
                 continue
             
             print("line", line)
 
-            if "[D]" in line:
+            if "[DATA]" in line:
+                try:
+                    payload = line.split("[DATA]")[-1]
+
+                    parts = payload.split("|")
+
+                    if len(parts) != 3:
+                        raise ValueError("Invalid packet structure")
+
+                    message = parts[0]
+
+                    gps_part = parts[1].split(",")
+                    lat = float(gps_part[0])
+                    lon = float(gps_part[1])
+
+                    heading_part = parts[2].split(",")
+                    heading = float(heading_part[0])
+                    direction = heading_part[1]
+
+                    packet = {
+                        "timestamp": time.time(),
+                        "message": message,
+                        "gps": {
+                            "lat": lat,
+                            "lon": lon
+                        },
+                        "heading": heading,
+                        "direction": direction
+                    }
+
+                    print("Parsed DATA Packet:")
+                    print(packet)
+
+                    update_json(packet)
+
+                except Exception as e:
+                    print("Parse Error [DATA]:", e)
+
+            elif "[D]" in line:
                 try:
                     payload = line.split("[D]")[-1]
                     data, iv = payload.split(",")
@@ -48,15 +88,6 @@ def receive():
 
                 except Exception as e:
                     print("Parse Error:", e)
-
-            elif "[S]" in line:
-                try:
-                    payload = line.split("[S]")[-1]
-                    latlon, heading = payload.split("|")
-                    lat, lon = list(map(float, latlon.split(",")))
-                    heading = int(heading)
-                except:
-                    ...
 
 
 

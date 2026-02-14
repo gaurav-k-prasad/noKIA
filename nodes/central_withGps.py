@@ -38,16 +38,16 @@ def receive():
         if not line:
             continue
 
-        if line.startswith("[D]"):
+        if "[D]" in line:
             try:
-                payload = line.replace("[D]", "").strip()
+                payload = line.split("[D]")[-1]
                 data, iv = payload.split(",")
                 message = decrypt_and_speak(data, iv)
 
             except Exception as e:
                 print("Parse Error:", e)
-        elif line.startswith("[S]"):
-            payload = line.replace("[S]", "").strip()
+        elif "[S]" in line:
+            payload = line.split("[S]")[-1]
             latlan, heading, dists, heart = payload.split("|")
 
             lat, lon = list(map(int, latlan.split(",")))

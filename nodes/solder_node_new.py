@@ -4,6 +4,7 @@ import threading
 import json
 import time
 from decrypt_speech import decrypt_and_speak
+
 # import visionrpi as vision  # module for cv
 
 SERIAL_PORT = "COM3"
@@ -33,9 +34,9 @@ def receive():
             if not line:
                 continue
 
-            if line.startswith("[D]"):
+            if "[D]" in line:
                 try:
-                    payload = line.replace("[D]", "").strip()
+                    payload = line.split("[D]")[-1]
                     data, iv = payload.split(",")
                     message = decrypt_and_speak(data, iv)
                     update_json(message)

@@ -21,7 +21,8 @@ HardwareSerial gpsSerial(2);
 TinyGPSPlus gps;
 QMC5883LCompass compass;
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   delay(1000);
 
@@ -32,8 +33,10 @@ void setup() {
 
   LoRa.setPins(SS, RST, DIO0);
 
-  if (!LoRa.begin(LORA_FREQ)) {
-    while (1);
+  if (!LoRa.begin(LORA_FREQ))
+  {
+    while (1)
+      ;
   }
 
   LoRa.setSpreadingFactor(7);
@@ -45,9 +48,11 @@ void setup() {
   Serial.println("NODE READY (CLEAN FORMAT)");
 }
 
-void loop() {
+void loop()
+{
 
-  while (gpsSerial.available()) {
+  while (gpsSerial.available())
+  {
     gps.encode(gpsSerial.read());
   }
 
@@ -60,21 +65,24 @@ void loop() {
   heading = heading * 180 / PI;
   heading += declinationAngle;
 
-  if (heading < 0) heading += 360;
-  if (heading > 360) heading -= 360;
+  if (heading < 0)
+    heading += 360;
+  if (heading > 360)
+    heading -= 360;
 
   // -------- SERIAL → LORA --------
-  if (Serial.available()) {
-
-    Serial.readStringUntil('\n'); // trigger only
-
+  if (Serial.available())
+  {
     String packet = "[S]";
 
-    if (gps.location.isValid()) {
+    if (gps.location.isValid())
+    {
       packet += String(gps.location.lat(), 6);
       packet += ",";
       packet += String(gps.location.lng(), 6);
-    } else {
+    }
+    else
+    {
       packet += "0,0";
     }
 
@@ -85,15 +93,16 @@ void loop() {
     LoRa.print(packet);
     LoRa.endPacket();
 
-    Serial.println("TX OK");
+    Serial.println(packet);
   }
 
-  // -------- LORA → SERIAL --------
   int packetSize = LoRa.parsePacket();
 
-  if (packetSize) {
+  if (packetSize)
+  {
     String received = "";
-    while (LoRa.available()) {
+    while (LoRa.available())
+    {
       received += (char)LoRa.read();
     }
     received.trim();

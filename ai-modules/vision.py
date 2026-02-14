@@ -5,6 +5,8 @@ import socketio
 # INFO - Change server url in R-Pi
 SERVER_URL = "http://localhost:8000"
 KNOWN_HEIGHT = 1.7
+
+
 FOCAL_LENGTH = 600
 
 sio = socketio.Client()

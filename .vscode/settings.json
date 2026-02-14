@@ -3,6 +3,7 @@
     "ASGI",
     "imshow",
     "latlon",
+    "pyttsx",
     "xyxy",
     "yolov"
   ]

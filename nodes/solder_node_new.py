@@ -3,7 +3,7 @@ import serial
 import threading
 import json
 import time
-from decrypt_speech import decrypt_and_speak
+from decrypt_speech import decrypt_and_queue
 
 # import visionrpi as vision  # module for cv
 
@@ -32,14 +32,18 @@ def receive():
         try:
             line = ser.readline().decode(errors="ignore").strip()
             if not line:
+                print("no output")
                 continue
+            print("line", line)
 
             if "[D]" in line:
                 try:
                     payload = line.split("[D]")[-1].strip()
                     data, iv = payload.split(",")
-                    message = decrypt_and_speak(data, iv)
+
+                    message = decrypt_and_queue(data, iv)
                     update_json(message)
+
 
                 except Exception as e:
                     print("Parse Error:", e)

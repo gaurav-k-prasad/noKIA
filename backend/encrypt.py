@@ -7,7 +7,9 @@ from Crypto.Random import get_random_bytes
 from Crypto.Hash import SHA256
 
 
-# 🔑 Must be SAME in both files
+# ==========================
+# AES PASSWORD (same everywhere)
+# ==========================
 PASSWORD = "my_secret_key_123"
 
 
@@ -26,19 +28,36 @@ def encrypt_aes(text, key):
     return encrypted, iv
 
 
-print("\nPaste NORMAL JSON")
-print("Type exit to quit\n")
+print("\n Paste NORMAL JSON (Multi-line supported)")
+print("Just press Enter after last } \n")
 
 
 while True:
 
-    data = input("JSON> ")
+    lines = []
+    open_braces = 0
+
+    # Read until JSON is complete
+    while True:
+
+        line = input()
+
+        open_braces += line.count("{")
+        open_braces -= line.count("}")
+
+        lines.append(line)
+
+        # JSON finished
+        if open_braces == 0 and "{" in "".join(lines):
+            break
+
+    data = "\n".join(lines).strip()
 
     if data.lower() == "exit":
         break
 
     try:
-        # Parse JSON
+        # Validate JSON
         obj = json.loads(data)
 
         key = get_key(PASSWORD)
@@ -51,8 +70,12 @@ while True:
             "iv": base64.b64encode(iv).decode()
         }
 
-        print("\n🔐 Encrypted JSON (Send this):")
+        print("\n🔐 Encrypted JSON (Send this):\n")
         print(json.dumps(output, indent=2))
 
+        print("\n📄 Paste next JSON...\n")
+
     except Exception as e:
-        print("❌ Error:", e)
+        print("\n Error:")
+        print(e)
+        print("\nTry again.\n")

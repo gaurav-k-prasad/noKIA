@@ -7,7 +7,9 @@ from Crypto.Util.Padding import unpad
 from Crypto.Hash import SHA256
 
 
-# 🔑 SAME PASSWORD AS encrypt.py
+# =====================
+# AES PASSWORD
+# =====================
 PASSWORD = "my_secret_key_123"
 
 
@@ -18,7 +20,6 @@ def get_key(password):
 def decrypt_aes(enc_data, iv, key):
 
     cipher = AES.new(key, AES.MODE_CBC, iv)
-
     decrypted = cipher.decrypt(enc_data)
 
     return unpad(decrypted, AES.block_size).decode()
@@ -31,19 +32,36 @@ engine = pyttsx3.init()
 engine.setProperty("rate", 170)
 
 
-print("\nPaste ENCRYPTED JSON")
-print("Type exit to quit\n")
+print("\n Paste ENCRYPTED JSON (Multi-line supported)")
+print("Just press Enter after last } \n")
 
 
 while True:
 
-    data = input("JSON> ")
+    lines = []
+    open_braces = 0
+
+    # Read until JSON complete
+    while True:
+
+        line = input()
+
+        open_braces += line.count("{")
+        open_braces -= line.count("}")
+
+        lines.append(line)
+
+        # JSON finished
+        if open_braces == 0 and "{" in "".join(lines):
+            break
+
+    data = "\n".join(lines).strip()
 
     if data.lower() == "exit":
         break
 
     try:
-        # Read encrypted JSON
+        # Parse encrypted JSON
         obj = json.loads(data)
 
         enc_b64 = obj["data"]
@@ -54,10 +72,10 @@ while True:
 
         key = get_key(PASSWORD)
 
-        # Decrypt
+        # 🔓 Decrypt
         decrypted_text = decrypt_aes(enc_bytes, iv_bytes, key)
 
-        print("\n🔓 Decrypted JSON:")
+        print("\n Decrypted JSON:")
         print(decrypted_text)
 
         # Convert to JSON
@@ -68,11 +86,14 @@ while True:
 
         if msg:
             print("\n🔊 Speaking:", msg)
-
             engine.say(msg)
             engine.runAndWait()
         else:
-            print("❌ No 'message' found")
+            print(" No 'message' found")
+
+        print("\n📄 Paste next encrypted JSON...\n")
 
     except Exception as e:
-        print("❌ Error:", e)
+        print("\n Error:")
+        print(e)
+        print("\nTry again.\n")

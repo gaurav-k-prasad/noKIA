@@ -10,6 +10,7 @@ from decrypt_speech import decrypt_and_speak
 SERIAL_PORT = "COM3"
 BAUD = 115200
 OUTPUT_FILE = "data.json"
+lat = 0, lon = 0, heading = 0
 
 ser = serial.Serial(SERIAL_PORT, BAUD, timeout=0.1)
 
@@ -28,11 +29,15 @@ def update_json(message):
 
 
 def receive():
+    global lat, lon, heading
     while True:
         try:
             line = ser.readline().decode(errors="ignore").strip()
             if not line:
+                print("no output")
                 continue
+            
+            print("line", line)
 
             if "[D]" in line:
                 try:
@@ -43,6 +48,18 @@ def receive():
 
                 except Exception as e:
                     print("Parse Error:", e)
+
+            elif "[S]" in line:
+                try:
+                    payload = line.split("[S]")[-1]
+                    latlon, heading = payload.split("|")
+                    lat, lon = list(map(float, latlon.split(",")))
+                    heading = int(heading)
+                except:
+                    ...
+
+
+
         except Exception as e:
             print("Parse error:", e)
 
@@ -74,7 +91,7 @@ def watch_voice_queue():
 def send_self_data():
     while True:
         # ! WARNING
-        payload = "12,55" + "|" + "123" + "|" + "53,33,22" + "|" + "32"
+        payload = f"{lat},{lon}" + "|" + f"{heading}" + "|" + "53,33,22" + "|" + "32"
         tx_packet = f"[S]{payload}\n"
         ser.write(tx_packet.encode())
         print("\n>> AUTO-SENT LAT LNG")

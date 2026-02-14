@@ -80,10 +80,6 @@ void loop() {
 
     packet += "|";
     packet += String((int)heading);
-    packet += "|";
-
-    // keep distances field (Python still expects it)
-    packet += "0,0,0";
 
     LoRa.beginPacket();
     LoRa.print(packet);

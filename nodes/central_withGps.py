@@ -61,15 +61,18 @@ def watch_voice_queue():
     while True:
         if os.path.exists("temp_message.json"):
             try:
-                with open("temp_message.json", "w") as f:
+                with open("temp_message.json", "r") as f:
                     encrypted_data = json.load(f)
-                    isData = encrypted_data["valid"]
 
-                    if isData:
-                        payload = encrypted_data["data"] + "," + encrypted_data["iv"]
-                        tx_packet = f"[D]{payload}\n"
-                        ser.write(tx_packet.encode())
-                        print("\n>> AUTO-SENT ENCRYPTED VOICE PACKET")
+                isData = encrypted_data.get("valid", False)
+
+                if isData:
+                    payload = encrypted_data["data"] + "," + encrypted_data["iv"]
+                    tx_packet = f"[D]{payload}\n"
+                    ser.write(tx_packet.encode())
+                    print("\n>> AUTO-SENT ENCRYPTED VOICE PACKET")
+
+                    with open("temp_message.json", "w") as f:
                         json.dump({"valid": False}, f)
 
             except Exception as e:
@@ -78,5 +81,11 @@ def watch_voice_queue():
         time.sleep(1)
 
 
-threading.Thread(target=receive, daemon=True).start()
-threading.Thread(target=watch_voice_queue, daemon=True).start()
+t1 = threading.Thread(target=receive)
+t2 = threading.Thread(target=watch_voice_queue)
+
+t1.start()
+t2.start()
+
+t1.join()
+t2.join()

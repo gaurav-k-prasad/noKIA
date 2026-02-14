@@ -5,6 +5,15 @@ import json
 import time
 
 from decrypt_speech import decrypt_and_speak
+import socketio
+
+sio = socketio.Client()
+
+try:
+    sio.connect("http://localhost:8000")
+    print("Connected to Command Server!")
+except Exception as e:
+    print(f"Socket connection failed: {e}")
 
 SERIAL_PORT = "COM5"
 BAUD = 115200
@@ -58,6 +67,18 @@ def receive():
             dists = map(int, dists.split(","))
             heart = int(heart)
             update_json(lat, lon, heading, heart)
+
+            telemetry_data = {
+                "id": SOLDIER_ID,
+                "pos": (lat, lon),
+                "heading": heading,
+                "dist": dists,
+                "heart": heart,
+            }
+
+            if sio.connected:
+                sio.emit("telemetry_update", telemetry_data)
+                print(f">> Pushed to Server: {telemetry_data}")
 
 
 def watch_voice_queue():

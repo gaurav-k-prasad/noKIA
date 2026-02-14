@@ -4,7 +4,7 @@ import threading
 import json
 import time
 from decrypt_speech import decrypt_and_speak
-import visionrpi as vision  # module for cv
+# import visionrpi as vision  # module for cv
 
 SERIAL_PORT = "COM3"
 BAUD = 115200
@@ -70,7 +70,7 @@ def watch_voice_queue():
 def send_self_data():
     while True:
         # ! WARNING
-        payload = "12,55" + "|" + "123" + "|" + vision.get_data() + "|" + "32"
+        payload = "12,55" + "|" + "123" + "|" + "53,33,22" + "|" + "32"
         tx_packet = f"[S]{payload}\n"
         ser.write(tx_packet.encode())
         print("\n>> AUTO-SENT LAT LNG")

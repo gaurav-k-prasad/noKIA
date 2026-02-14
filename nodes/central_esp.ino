@@ -6,8 +6,6 @@
 #define DIO0 26
 #define LORA_FREQ 433E6
 
-bool transmitMode = false;
-
 void setup() {
   Serial.begin(115200);
   LoRa.setPins(SS, RST, DIO0);
@@ -31,12 +29,13 @@ void loop() {
   if (Serial.available()) {
 
     String msg = Serial.readStringUntil('\n');
+    msg.trim();  // remove \r \n spaces
 
-    LoRa.beginPacket();
-    LoRa.print(msg);
-    LoRa.endPacket();
-
-    Serial.println("SENT");
+    if (msg.length() > 0) {
+      LoRa.beginPacket();
+      LoRa.print(msg);   // send EXACTLY as python sent
+      LoRa.endPacket();
+    }
   }
 
   // -------- LORA → SERIAL --------
@@ -50,6 +49,9 @@ void loop() {
       received += (char)LoRa.read();
     }
 
-    Serial.println("RX:" + received);
+    received.trim();
+
+    // 🔥 IMPORTANT: print RAW packet only
+    Serial.println(received);
   }
 }

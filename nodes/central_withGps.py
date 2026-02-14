@@ -36,7 +36,10 @@ def receive():
         line = ser.readline().decode(errors="ignore").strip()
 
         if not line:
+            print("no line")
             continue
+
+        print("line", line)
 
         if "[D]" in line:
             try:

@@ -12,19 +12,16 @@
 #define GPS_RX 16
 #define GPS_TX 17
 
-// ===== CALIBRATION VALUES =====
 float offsetX = -346;
 float offsetY = 1189;
-
-float scaleX = 1.18;   // Yrange/Xrange
-float declinationAngle = 2.0;  // Adjust for your city if needed
+float scaleX = 1.18;
+float declinationAngle = 2.0;
 
 HardwareSerial gpsSerial(2);
 TinyGPSPlus gps;
 QMC5883LCompass compass;
 
 void setup() {
-
   Serial.begin(115200);
   delay(1000);
 
@@ -45,17 +42,15 @@ void setup() {
   LoRa.enableCrc();
   LoRa.setTxPower(14);
 
-  Serial.println("NODE READY (CALIBRATED)");
+  Serial.println("NODE READY (CLEAN FORMAT)");
 }
 
 void loop() {
 
-  // -------- UPDATE GPS --------
   while (gpsSerial.available()) {
     gps.encode(gpsSerial.read());
   }
 
-  // -------- COMPASS --------
   compass.read();
 
   float x = (compass.getX() - offsetX) * scaleX;
@@ -63,44 +58,32 @@ void loop() {
 
   float heading = atan2(y, x);
   heading = heading * 180 / PI;
-
   heading += declinationAngle;
 
   if (heading < 0) heading += 360;
   if (heading > 360) heading -= 360;
 
-  // Convert to direction
-  String direction;
-  if (heading >= 337.5 || heading < 22.5) direction = "N";
-  else if (heading < 67.5) direction = "NE";
-  else if (heading < 112.5) direction = "E";
-  else if (heading < 157.5) direction = "SE";
-  else if (heading < 202.5) direction = "S";
-  else if (heading < 247.5) direction = "SW";
-  else if (heading < 292.5) direction = "W";
-  else direction = "NW";
-
   // -------- SERIAL → LORA --------
   if (Serial.available()) {
 
-    String msg = Serial.readStringUntil('\n');
+    Serial.readStringUntil('\n'); // trigger only
 
-    String packet = "[DATA]";
-    packet += msg;
-    packet += "|";
+    String packet = "[S]";
 
     if (gps.location.isValid()) {
       packet += String(gps.location.lat(), 6);
       packet += ",";
       packet += String(gps.location.lng(), 6);
     } else {
-      packet += "0.0,0.0";
+      packet += "0,0";
     }
 
     packet += "|";
-    packet += String(heading, 2);
-    packet += ",";
-    packet += direction;
+    packet += String((int)heading);
+    packet += "|";
+
+    // keep distances field (Python still expects it)
+    packet += "0,0,0";
 
     LoRa.beginPacket();
     LoRa.print(packet);
@@ -117,6 +100,7 @@ void loop() {
     while (LoRa.available()) {
       received += (char)LoRa.read();
     }
-    Serial.println("RX:" + received);
+    received.trim();
+    Serial.println(received);
   }
 }

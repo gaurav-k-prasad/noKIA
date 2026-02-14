@@ -28,21 +28,26 @@ game_state = {}
 simulator = Simulator()
 
 
-async def run_simulation():
-    print("Simulation started!")  # Added to confirm it's running
+async def run_threat_sim():
     while True:
         if random.random() > 0.7:
             new_threat = simulator.next_threat()
             await sio.emit("new_threat", new_threat)
             print(f"Sent Threat: {new_threat['id']}")
-            await asyncio.sleep(1.5)
+        await asyncio.sleep(2.5)
 
+
+async def run_message_sim():
+    while True:
         if random.random() > 0.5:
             new_msg = simulator.next_message()
             await sio.emit("new_message", new_msg)
             print(f"Sent Message: {new_msg['id']}")
-            await asyncio.sleep(1.5)
+        await asyncio.sleep(2.5)
 
+
+async def run_heart_sim():
+    while True:
         new_heart = simulator.next_heart_data()
         await sio.emit("new_heart_data", new_heart)
         print(f"Sent Message: {new_heart['id']}")
@@ -97,7 +102,10 @@ def calculate_threat_pos(soldier_x, soldier_y, soldier_heading, distances):
 
         # The math to project a point in 2D space using a compass heading
         offset_x = dist * math.sin(heading_rad) * PROTOTYPE_SCALING_FACTOR
-        offset_y = dist * math.cos(heading_rad) * PROTOTYPE_SCALING_FACTOR
+        offset_y = (
+            dist * math.cos(heading_rad)
+            + random.randint(3, 5) * PROTOTYPE_SCALING_FACTOR
+        )
 
         threat_x = soldier_x + offset_x
         threat_y = soldier_y + offset_y
@@ -112,7 +120,9 @@ def calculate_threat_pos(soldier_x, soldier_y, soldier_heading, distances):
 
 @app.on_event("startup")
 async def startup_event():
-    sio.start_background_task(run_simulation)
+    sio.start_background_task(run_message_sim)
+    sio.start_background_task(run_threat_sim)
+    sio.start_background_task(run_heart_sim)
     sio.start_background_task(monitor_stale_data)
 
 
